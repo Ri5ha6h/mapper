@@ -1,0 +1,11 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll.oxfmt": "explicit",
+        "source.fixAll.oxlint": "explicit",
+        "quickfix.oxc": "explicit",
+        "source.organizeImports.oxc": "explicit"
+    },
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true,
+    "editor.fontSize": 16
+}
