@@ -1,7 +1,7 @@
 "use client";
 
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, pointerWithin } from "@dnd-kit/core";
-import { X, ArrowRight, FileCode } from "lucide-react";
+import { X, ArrowRight, FileCode, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { TreeView } from "./tree-view";
 import { GenerateModal } from "./generate-modal";
 
 export function MapperFlow() {
-    const { source, target, mappings, addMapping, removeMapping } = useMapper();
+    const { source, target, mappings, setMappings, addMapping, removeMapping } = useMapper();
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [sourceRefs, setSourceRefs] = useState<Map<string, HTMLElement>>(new Map());
@@ -104,15 +104,26 @@ export function MapperFlow() {
                 <Card className="mx-4 mb-4">
                     <div className="flex items-center justify-between p-2 border-b bg-muted/50">
                         <span className="text-sm font-medium">Mappings ({mappings.length})</span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setGenerateModalOpen(true)}
-                            disabled={mappings.length === 0 || !source || !target}
-                        >
-                            <FileCode className="h-4 w-4 mr-1" />
-                            Generate Result
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setMappings([])}
+                                disabled={mappings.length === 0}
+                            >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Clear
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setGenerateModalOpen(true)}
+                                disabled={mappings.length === 0 || !source || !target}
+                            >
+                                <FileCode className="h-4 w-4 mr-1" />
+                                Generate Result
+                            </Button>
+                        </div>
                     </div>
                     <ScrollArea className="max-h-[150px]">
                         {mappings.length === 0 ? (
