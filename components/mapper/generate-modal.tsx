@@ -2,21 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { Play, Copy, Download, X, ChevronDown } from "lucide-react";
+import { Play, Copy, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMapper } from "@/lib/mapper/context";
 import { applyMappings, generateJSONOutput, generateXMLOutput, treeToData, parseInput } from "@/lib/mapper/engine";
 import { parseDSL, generateDSL, type DSLError } from "@/lib/mapper/dsl";
-import { generateCode } from "@/lib/mapper/code-generator";
-
-const LANGUAGES = [
-    { label: "JavaScript", value: "javascript" },
-    { label: "TypeScript", value: "typescript" },
-    { label: "Groovy", value: "groovy" },
-    { label: "Java", value: "java" },
-    { label: "Python", value: "python" },
-    { label: "C#", value: "csharp" },
-] as const;
 
 interface GenerateModalProps {
     open: boolean;
@@ -31,9 +21,6 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
     const [output, setOutput] = useState("");
     const [errors, setErrors] = useState<DSLError[]>([]);
     const [showErrorModal, setShowErrorModal] = useState(false);
-    const [showCopyMenu, setShowCopyMenu] = useState(false);
-    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
-    const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const [topHeight, setTopHeight] = useState(40);
     const [leftWidth, setLeftWidth] = useState(50);
@@ -91,30 +78,15 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
     }, [script, input, source, target, setMappings]);
 
     const handleCopy = useCallback(() => {
-        navigator.clipboard.writeText(output);
-    }, [output]);
-
-    const handleDownload = useCallback(() => {
-        const blob = new Blob([output], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = target ? `output.${target.type}` : "output.txt";
-        a.click();
-        URL.revokeObjectURL(url);
-    }, [output, target]);
-
-    const handleCopyRaw = useCallback(() => {
         const data = {
             script,
             input: input,
             output: output,
         };
         navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-        setShowCopyMenu(false);
     }, [script, input, output]);
 
-    const handleDownloadRaw = useCallback(() => {
+    const handleDownload = useCallback(() => {
         const data = {
             script,
             input: input,
@@ -127,8 +99,11 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
         a.download = "mapper-output-raw.json";
         a.click();
         URL.revokeObjectURL(url);
-        setShowDownloadMenu(false);
     }, [script, input, output]);
+
+    const handleOutputCopy = useCallback(() => {
+        navigator.clipboard.writeText(output);
+    }, [output]);
 
     const handleMouseMove = useCallback(
         (e: React.MouseEvent) => {
@@ -162,17 +137,6 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
         }
     }, [isDraggingH, isDraggingV, handleMouseUp]);
 
-    useEffect(() => {
-        const handleClickOutside = () => {
-            setShowCopyMenu(false);
-            setShowDownloadMenu(false);
-        };
-        if (showCopyMenu || showDownloadMenu) {
-            document.addEventListener("click", handleClickOutside);
-            return () => document.removeEventListener("click", handleClickOutside);
-        }
-    }, [showCopyMenu, showDownloadMenu]);
-
     if (!open) return null;
 
     return (
@@ -186,43 +150,14 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
                 <div className="flex items-center justify-between px-4 py-3 border-b">
                     <h2 className="text-lg font-semibold">Generate Output</h2>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setShowPreviewModal(true)}>
-                            Preview Code
+                        <Button variant="outline" size="sm" onClick={handleCopy}>
+                            <Copy className="h-4 w-4 mr-1" />
+                            Copy JSON
                         </Button>
-                        <div className="relative">
-                            <Button variant="outline" size="sm" onClick={() => setShowCopyMenu(!showCopyMenu)}>
-                                <Copy className="h-4 w-4 mr-1" />
-                                Copy JSON
-                                <ChevronDown className="h-3 w-3 ml-1" />
-                            </Button>
-                            {showCopyMenu && (
-                                <div className="absolute right-0 top-full mt-1 z-10 w-40 bg-background border rounded-md shadow-lg">
-                                    <button
-                                        className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
-                                        onClick={handleCopyRaw}
-                                    >
-                                        Copy Raw
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                        <div className="relative">
-                            <Button variant="outline" size="sm" onClick={() => setShowDownloadMenu(!showDownloadMenu)}>
-                                <Download className="h-4 w-4 mr-1" />
-                                Download JSON
-                                <ChevronDown className="h-3 w-3 ml-1" />
-                            </Button>
-                            {showDownloadMenu && (
-                                <div className="absolute right-0 top-full mt-1 z-10 w-40 bg-background border rounded-md shadow-lg">
-                                    <button
-                                        className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
-                                        onClick={handleDownloadRaw}
-                                    >
-                                        Download Raw
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        <Button variant="outline" size="sm" onClick={handleDownload}>
+                            <Download className="h-4 w-4 mr-1" />
+                            Download JSON
+                        </Button>
                         <Button onClick={() => errors.length > 0 ? setShowErrorModal(true) : handleRun()} size="sm" className="relative">
                             <Play className="h-4 w-4 mr-1" />
                             Run
@@ -303,11 +238,8 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
                             <div className="absolute top-0 left-0 right-0 px-2 py-1 bg-muted/50 text-xs font-medium border-b flex items-center justify-between">
                                 <span>Output ({target?.type ?? "N/A"})</span>
                                 <div className="flex gap-1">
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleCopy}>
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleOutputCopy}>
                                         <Copy className="h-3 w-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleDownload}>
-                                        <Download className="h-3 w-3" />
                                     </Button>
                                 </div>
                             </div>
@@ -357,71 +289,6 @@ export function GenerateModal({ open, onOpenChange }: GenerateModalProps) {
                     </div>
                 </div>
             )}
-
-            {/* Preview Code Modal */}
-            {showPreviewModal && (
-                <PreviewCodeModal
-                    script={script}
-                    onClose={() => setShowPreviewModal(false)}
-                />
-            )}
-        </div>
-    );
-}
-
-interface PreviewCodeModalProps {
-    script: string;
-    onClose: () => void;
-}
-
-function PreviewCodeModal({ script, onClose }: PreviewCodeModalProps) {
-    const [language, setLanguage] = useState<string>("groovy");
-
-    const parseResult = parseDSL(script);
-    const generatedCode = parseResult.errors.length === 0
-        ? generateCode(parseResult.mappings, language)
-        : "# Fix DSL errors to see generated code";
-
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={onClose}>
-            <div
-                className="bg-background border rounded-lg shadow-xl w-[80vw] h-[80vh] flex flex-col"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex items-center justify-between px-4 py-3 border-b">
-                    <h2 className="text-lg font-semibold">Preview Code</h2>
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="h-8 px-2 rounded-md border bg-background text-sm"
-                        >
-                            {LANGUAGES.map((lang) => (
-                                <option key={lang.value} value={lang.value}>
-                                    {lang.label}
-                                </option>
-                            ))}
-                        </select>
-                        <Button variant="ghost" size="icon" onClick={onClose}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                    <Editor
-                        height="100%"
-                        language={language === "csharp" ? "csharp" : language}
-                        value={generatedCode}
-                        options={{
-                            minimap: { enabled: false },
-                            lineNumbers: "on",
-                            fontSize: 13,
-                            scrollBeyondLastLine: false,
-                            readOnly: true,
-                        }}
-                    />
-                </div>
-            </div>
         </div>
     );
 }
