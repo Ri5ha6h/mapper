@@ -1,0 +1,51 @@
+Implement the following plan:
+
+# Plan: Clear Mappings Button + Fix Tree Node Expand/Collapse
+
+## Context
+- Need a button to clear all mappings
+- Expand/collapse toolbar should be removed; chevron toggles on tree nodes should be the primary mechanism
+- **Bug**: chevron clicks don't work because dnd-kit drag listeners on parent div intercept `pointerdown` before `click` fires on the button
+
+## Changes
+
+### 1. Fix chevron toggle on tree nodes
+**File:** `components/mapper/tree-node.tsx` (line 72-80)
+- Add `onPointerDown={(e) => e.stopPropagation()}` to the chevron `<button>` — prevents dnd-kit from capturing the event
+
+### 2. Remove Expand/Collapse toolbar from TreeView
+**File:** `components/mapper/tree-view.tsx`
+- Delete toolbar div (lines 48-57)
+- Remove unused imports: `ChevronsUpDown`, `ChevronsDownUp`, `Button`, `collectNodeIds`
+- Remove `handleExpandAll`, `handleCollapseAll` functions
+- Remove `expandAll`/`collapseAll` from useMapper destructure
+
+### 3. Add "Clear Mappings" button to mappings header
+**File:** `components/mapper/mapper-flow.tsx`
+- Add `Trash2` icon import from lucide-react
+- Add `setMappings` to useMapper destructure (line 17)
+- Add button with Trash2 icon left of "Generate Result", calls `setMappings([])`, disabled when `mappings.length === 0`
+
+## Files Modified
+- `components/mapper/tree-node.tsx` — fix chevron pointer event
+- `components/mapper/tree-view.tsx` — remove toolbar
+- `components/mapper/mapper-flow.tsx` — add clear mappings button
+
+## Verification
+- Click chevron on source/target tree nodes → expands/collapses correctly
+- No expand/collapse toolbar visible
+- "Clear Mappings" button clears all mappings; disabled when empty
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/kakarot/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+Create a plan for below and ask questions:
+- If I collapse source tree node, target tree node also collapses. This should not happen. Each source and target tree node expand and collapse should be independent.
+
+---
+
+[Request interrupted by user for tool use]

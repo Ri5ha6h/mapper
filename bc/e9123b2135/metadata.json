@@ -3,9 +3,11 @@
   "checkpoint_id": "bce9123b2135",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
+    "components/mapper/mapper-flow.tsx",
     "components/mapper/tree-node.tsx",
+    "components/mapper/tree-view.tsx",
     "lib/mapper/context.tsx"
   ],
   "sessions": [
@@ -15,13 +17,20 @@
       "context": "/bc/e9123b2135/0/context.md",
       "content_hash": "/bc/e9123b2135/0/content_hash.txt",
       "prompt": "/bc/e9123b2135/0/prompt.txt"
+    },
+    {
+      "metadata": "/bc/e9123b2135/1/metadata.json",
+      "transcript": "/bc/e9123b2135/1/full.jsonl",
+      "context": "/bc/e9123b2135/1/context.md",
+      "content_hash": "/bc/e9123b2135/1/content_hash.txt",
+      "prompt": "/bc/e9123b2135/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 14,
-    "cache_creation_tokens": 9673,
-    "cache_read_tokens": 345719,
-    "output_tokens": 865,
-    "api_call_count": 12
+    "input_tokens": 28,
+    "cache_creation_tokens": 27573,
+    "cache_read_tokens": 658835,
+    "output_tokens": 1061,
+    "api_call_count": 22
   }
 }

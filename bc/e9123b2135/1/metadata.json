@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "bce9123b2135",
+  "session_id": "d00a396f-de05-427a-bd8b-65913f32495c",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-14T19:27:24.188483Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "components/mapper/mapper-flow.tsx",
+    "components/mapper/tree-node.tsx",
+    "components/mapper/tree-view.tsx"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 14,
+    "cache_creation_tokens": 17900,
+    "cache_read_tokens": 313116,
+    "output_tokens": 196,
+    "api_call_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-14T19:27:24.144443Z",
+    "agent_lines": 22,
+    "human_added": 28,
+    "human_modified": 8,
+    "human_removed": 0,
+    "total_committed": 58,
+    "agent_percentage": 37.93103448275862
+  },
+  "transcript_path": ".claude/projects/-Users-kakarot-Self-Sandbox-mapper-dnd/d00a396f-de05-427a-bd8b-65913f32495c.jsonl"
+}
