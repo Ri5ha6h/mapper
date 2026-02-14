@@ -1,0 +1,43 @@
+Implement the following plan:
+
+# Plan: Independent Expand/Collapse for Source & Target Trees
+
+## Context
+`expandedNodes` is a single `Set<string>` shared by both trees. Node IDs are path-based (`root.user.name`), so when source and target have overlapping structure, toggling one side affects the other.
+
+## Changes
+
+### 1. Split `expandedNodes` into per-side sets
+**File:** `lib/mapper/context.tsx`
+
+**State:** `expandedNodes: Set<string>` → `sourceExpanded: Set<string>; targetExpanded: Set<string>`
+
+**Actions:** Add `side: "source" | "target"` payload to `TOGGLE_EXPAND`, remove `EXPAND_ALL`/`COLLAPSE_ALL` (unused after previous PR)
+
+**Reducer:**
+- `TOGGLE_EXPAND` — toggle in `sourceExpanded` or `targetExpanded` based on `side`
+- `SET_SOURCE` / `SET_TARGET` — clear the respective expanded set on file change
+
+**Context value:**
+- Remove `expandedNodes`, `expandAll`, `collapseAll`
+- `toggleExpand(nodeId, side)` — add side param
+- `isExpanded(nodeId, side)` — new helper, checks correct set
+
+### 2. Update TreeNode to pass `side`
+**File:** `components/mapper/tree-node.tsx`
+- Replace `expandedNodes.has(node.id)` with `isExpanded(node.id, side)`
+- Pass `side` to `toggleExpand(node.id, side)`
+
+## Files Modified
+- `lib/mapper/context.tsx` — split state, update reducer + context API
+- `components/mapper/tree-node.tsx` — pass `side` to toggle/check
+
+## Verification
+- Load files with overlapping structure (e.g. same JSON on both sides)
+- Collapse a source node → target stays expanded
+- Collapse a target node → source stays expanded
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/kakarot/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
