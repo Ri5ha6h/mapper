@@ -1,0 +1,10 @@
+Create a comprehensive and concise plan spread across multiple phases and store it in  folder, for below:                                          
+  - I want to create a mapper flow, where we will take two files. One file will be considered as a source input and the other file would be          
+  considered as a target output.                                                                                                                     
+  - Files can be of type JSON or XML. Mapping can take place between JSON to JSON, JSON to XML, XML to JSON and XML to XML files.                    
+  - Source input and target output should have a upload button through which we can upload a file based on the two file types.                       
+  - Both source input and target output file should be in tree format.                                                                               
+  - From source input file I should be able to drag and draw the nodes to the target output file which will be called as mapping.                    
+  - Based on the above requirement check whether we have all the correct packages/dependencies installed or not. If there's any package or           
+  library missing, please let me know. This should be as a phase one where I can install those packages so that from phase two we can have all       
+  the correct dependencies libraries in place to move forward with the rest of the phases.

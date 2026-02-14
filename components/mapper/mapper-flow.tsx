@@ -1,7 +1,7 @@
 "use client";
 
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, pointerWithin } from "@dnd-kit/core";
-import { X, ArrowRight } from "lucide-react";
+import { X, ArrowRight, FileCode } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import type { DragData } from "@/lib/mapper/types";
 import { ConnectionLines } from "./connection-lines";
 import { FileUpload } from "./file-upload";
 import { TreeView } from "./tree-view";
+import { GenerateModal } from "./generate-modal";
 
 export function MapperFlow() {
     const { source, target, mappings, addMapping, removeMapping } = useMapper();
@@ -19,6 +20,7 @@ export function MapperFlow() {
     const [sourceRefs, setSourceRefs] = useState<Map<string, HTMLElement>>(new Map());
     const [targetRefs, setTargetRefs] = useState<Map<string, HTMLElement>>(new Map());
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
     const handleSourceRefs = (refs: Map<string, HTMLElement>) => {
         setSourceRefs((prev) => {
@@ -100,8 +102,17 @@ export function MapperFlow() {
 
                 {/* Mappings list */}
                 <Card className="mx-4 mb-4">
-                    <div className="p-2 border-b bg-muted/50">
+                    <div className="flex items-center justify-between p-2 border-b bg-muted/50">
                         <span className="text-sm font-medium">Mappings ({mappings.length})</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setGenerateModalOpen(true)}
+                            disabled={mappings.length === 0 || !source || !target}
+                        >
+                            <FileCode className="h-4 w-4 mr-1" />
+                            Generate Result
+                        </Button>
                     </div>
                     <ScrollArea className="max-h-[150px]">
                         {mappings.length === 0 ? (
@@ -148,6 +159,8 @@ export function MapperFlow() {
                     </div>
                 ) : null}
             </DragOverlay>
+
+            <GenerateModal open={generateModalOpen} onOpenChange={setGenerateModalOpen} />
         </DndContext>
     );
 }

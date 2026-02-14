@@ -15,6 +15,7 @@ type MapperAction =
     | { type: "SET_TARGET"; payload: FileData | null }
     | { type: "ADD_MAPPING"; payload: Mapping }
     | { type: "REMOVE_MAPPING"; payload: string }
+    | { type: "SET_MAPPINGS"; payload: Mapping[] }
     | { type: "TOGGLE_EXPAND"; payload: string }
     | { type: "EXPAND_ALL"; payload: string[] }
     | { type: "COLLAPSE_ALL" };
@@ -60,6 +61,12 @@ function mapperReducer(state: MapperState, action: MapperAction): MapperState {
                 mappings: state.mappings.filter((m) => m.id !== action.payload),
             };
 
+        case "SET_MAPPINGS":
+            return {
+                ...state,
+                mappings: action.payload,
+            };
+
         case "TOGGLE_EXPAND": {
             const next = new Set(state.expandedNodes);
             if (next.has(action.payload)) {
@@ -86,6 +93,7 @@ interface MapperContextValue extends MapperState {
     setTarget: (data: FileData | null) => void;
     addMapping: (sourceId: string, targetId: string) => void;
     removeMapping: (id: string) => void;
+    setMappings: (mappings: Mapping[]) => void;
     toggleExpand: (nodeId: string) => void;
     expandAll: (nodeIds: string[]) => void;
     collapseAll: () => void;
@@ -117,6 +125,10 @@ export function MapperProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "REMOVE_MAPPING", payload: id });
     };
 
+    const setMappings = (mappings: Mapping[]) => {
+        dispatch({ type: "SET_MAPPINGS", payload: mappings });
+    };
+
     const toggleExpand = (nodeId: string) => {
         dispatch({ type: "TOGGLE_EXPAND", payload: nodeId });
     };
@@ -137,6 +149,7 @@ export function MapperProvider({ children }: { children: ReactNode }) {
                 setTarget,
                 addMapping,
                 removeMapping,
+                setMappings,
                 toggleExpand,
                 expandAll,
                 collapseAll,
