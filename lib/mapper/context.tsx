@@ -3,11 +3,14 @@
 import { createContext, useContext, useReducer, type ReactNode } from "react";
 import type { FileData, Mapping } from "./types";
 
+type Side = "source" | "target";
+
 interface MapperState {
     source: FileData | null;
     target: FileData | null;
     mappings: Mapping[];
-    expandedNodes: Set<string>;
+    sourceExpanded: Set<string>;
+    targetExpanded: Set<string>;
 }
 
 type MapperAction =
@@ -16,15 +19,14 @@ type MapperAction =
     | { type: "ADD_MAPPING"; payload: Mapping }
     | { type: "REMOVE_MAPPING"; payload: string }
     | { type: "SET_MAPPINGS"; payload: Mapping[] }
-    | { type: "TOGGLE_EXPAND"; payload: string }
-    | { type: "EXPAND_ALL"; payload: string[] }
-    | { type: "COLLAPSE_ALL" };
+    | { type: "TOGGLE_EXPAND"; payload: { nodeId: string; side: Side } };
 
 const initialState: MapperState = {
     source: null,
     target: null,
     mappings: [],
-    expandedNodes: new Set(),
+    sourceExpanded: new Set(),
+    targetExpanded: new Set(),
 };
 
 function mapperReducer(state: MapperState, action: MapperAction): MapperState {
@@ -33,14 +35,16 @@ function mapperReducer(state: MapperState, action: MapperAction): MapperState {
             return {
                 ...state,
                 source: action.payload,
-                mappings: [], // clear mappings on source change
+                mappings: [],
+                sourceExpanded: new Set(),
             };
 
         case "SET_TARGET":
             return {
                 ...state,
                 target: action.payload,
-                mappings: [], // clear mappings on target change
+                mappings: [],
+                targetExpanded: new Set(),
             };
 
         case "ADD_MAPPING": {
@@ -68,20 +72,15 @@ function mapperReducer(state: MapperState, action: MapperAction): MapperState {
             };
 
         case "TOGGLE_EXPAND": {
-            const next = new Set(state.expandedNodes);
-            if (next.has(action.payload)) {
-                next.delete(action.payload);
+            const key = action.payload.side === "source" ? "sourceExpanded" : "targetExpanded";
+            const next = new Set(state[key]);
+            if (next.has(action.payload.nodeId)) {
+                next.delete(action.payload.nodeId);
             } else {
-                next.add(action.payload);
+                next.add(action.payload.nodeId);
             }
-            return { ...state, expandedNodes: next };
+            return { ...state, [key]: next };
         }
-
-        case "EXPAND_ALL":
-            return { ...state, expandedNodes: new Set(action.payload) };
-
-        case "COLLAPSE_ALL":
-            return { ...state, expandedNodes: new Set() };
 
         default:
             return state;
@@ -94,9 +93,8 @@ interface MapperContextValue extends MapperState {
     addMapping: (sourceId: string, targetId: string) => void;
     removeMapping: (id: string) => void;
     setMappings: (mappings: Mapping[]) => void;
-    toggleExpand: (nodeId: string) => void;
-    expandAll: (nodeIds: string[]) => void;
-    collapseAll: () => void;
+    toggleExpand: (nodeId: string, side: Side) => void;
+    isExpanded: (nodeId: string, side: Side) => boolean;
 }
 
 const MapperContext = createContext<MapperContextValue | null>(null);
@@ -129,16 +127,12 @@ export function MapperProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "SET_MAPPINGS", payload: mappings });
     };
 
-    const toggleExpand = (nodeId: string) => {
-        dispatch({ type: "TOGGLE_EXPAND", payload: nodeId });
+    const toggleExpand = (nodeId: string, side: Side) => {
+        dispatch({ type: "TOGGLE_EXPAND", payload: { nodeId, side } });
     };
 
-    const expandAll = (nodeIds: string[]) => {
-        dispatch({ type: "EXPAND_ALL", payload: nodeIds });
-    };
-
-    const collapseAll = () => {
-        dispatch({ type: "COLLAPSE_ALL" });
+    const isExpanded = (nodeId: string, side: Side) => {
+        return side === "source" ? state.sourceExpanded.has(nodeId) : state.targetExpanded.has(nodeId);
     };
 
     return (
@@ -151,8 +145,7 @@ export function MapperProvider({ children }: { children: ReactNode }) {
                 removeMapping,
                 setMappings,
                 toggleExpand,
-                expandAll,
-                collapseAll,
+                isExpanded,
             }}
         >
             {children}

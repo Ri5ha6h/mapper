@@ -13,8 +13,8 @@ interface TreeNodeProps {
 }
 
 export function TreeNode({ node, side, onNodeRef }: TreeNodeProps) {
-    const { expandedNodes, toggleExpand, mappings } = useMapper();
-    const isExpanded = expandedNodes.has(node.id);
+    const { isExpanded: checkExpanded, toggleExpand, mappings } = useMapper();
+    const isExpanded = checkExpanded(node.id, side);
     const hasChildren = node.children && node.children.length > 0;
 
     // Check if this node is mapped
@@ -70,9 +70,10 @@ export function TreeNode({ node, side, onNodeRef }: TreeNodeProps) {
                 {/* Expand/collapse chevron */}
                 {hasChildren ? (
                     <button
+                        onPointerDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
                             e.stopPropagation();
-                            toggleExpand(node.id);
+                            toggleExpand(node.id, side);
                         }}
                         className="p-0.5 hover:bg-muted rounded"
                     >
